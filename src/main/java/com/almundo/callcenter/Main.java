@@ -11,6 +11,11 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+/**
+ * Clase principal que contiene el metodo main, esta utiliza un executorService para crear 10 hilos que representa el
+ * maximo numero de llamadas concurrentes que puede atender el call center. Se prueba con 20 llamadas. Las primeras 10
+ * llamadas se atienden concurrentemente, las siguientes 10 esperan hasta que exista un hilo activo disponible
+ */
 public class Main {
 
     private static final Dispatcher dispatcher = Dispatcher.getSingletonInstance();
