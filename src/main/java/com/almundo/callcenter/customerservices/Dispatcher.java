@@ -12,7 +12,7 @@ public class Dispatcher {
     private static final String MENSAJE_LLAMADA_RECIBIDA = "La llamada #%d sera contestada por %s";
     private static final String MENSAJE_LLAMADA_TERMINADA = "Llamada #%d ha terminado y duro %d segundos";
 
-    private volatile PriorityBlockingQueue<Employee> employees = new PriorityBlockingQueue<>();
+    private PriorityBlockingQueue<Employee> employees = new PriorityBlockingQueue<>();
 
     private static Dispatcher dispatcher;
 
