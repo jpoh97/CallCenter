@@ -1,5 +1,10 @@
 package com.almundo.callcenter.model.employees;
 
+/**
+ * Clase abstracta que representa un empleado. Esta clase es heredada por otras. Implementa la interfaz Comparable ya
+ * que se necesita para que el PriorityBlockingQueue sepa como organizar cada empleado dentro de la cola dependiendo de
+ * la prioridad del cargo
+ */
 public abstract class Employee implements Comparable<Employee>  {
 
     private final String name;

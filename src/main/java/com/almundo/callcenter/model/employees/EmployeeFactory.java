@@ -4,6 +4,9 @@ import com.almundo.callcenter.model.employees.implementations.Director;
 import com.almundo.callcenter.model.employees.implementations.Operator;
 import com.almundo.callcenter.model.employees.implementations.Supervisor;
 
+/**
+ * Implementacion del patron factory para obtener un nuevo objeto dependiendo del cargo solicitado
+ */
 public class EmployeeFactory {
 
     public static Employee getEmployee(String name, Charge charge) {
