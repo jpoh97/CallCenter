@@ -1,8 +1,8 @@
-package com.almundo.callcenter.employees;
+package com.almundo.callcenter.model.employees;
 
-import com.almundo.callcenter.employees.implementations.Director;
-import com.almundo.callcenter.employees.implementations.Operator;
-import com.almundo.callcenter.employees.implementations.Supervisor;
+import com.almundo.callcenter.model.employees.implementations.Director;
+import com.almundo.callcenter.model.employees.implementations.Operator;
+import com.almundo.callcenter.model.employees.implementations.Supervisor;
 
 public class EmployeeFactory {
 

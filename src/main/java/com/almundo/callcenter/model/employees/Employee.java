@@ -1,4 +1,4 @@
-package com.almundo.callcenter.employees;
+package com.almundo.callcenter.model.employees;
 
 public abstract class Employee implements Comparable<Employee>  {
 
