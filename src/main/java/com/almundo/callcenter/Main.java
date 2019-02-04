@@ -16,19 +16,19 @@ public class Main {
     private static final Dispatcher dispatcher = Dispatcher.getSingletonInstance();
 
     private static final String OPERATOR_NAME = "Operator #%d";
+    private static final String SUPERVISOR_NAME = "Supervisor #%d";
+    private static final String DIRECTOR_NAME = "Director #%d";
     private static final int OPERATORS = 7;
     private static final int SUPERVISORS = 2;
     private static final int DIRECTORS = 1;
-    private static final String SUPERVISOR_NAME = "Supervisor #%d";
-    private static final String DIRECTOR_NAME = "Director #%d";
-    private static final int NUMERO_DE_LLAMADAS_CONCURRENTES = 10;
 
-    private static final int NUMERO_DE_LLAMADAS_A_PROBAR = 20;
+    private static final int NUMBER_OF_CONCURRENT_CALLS = 10;
+    private static final int NUMBER_OF_TEST_CALLS = 20;
 
     public static void main(String... args) throws InterruptedException {
         createEmployees();
 
-        ExecutorService executorService = Executors.newFixedThreadPool(NUMERO_DE_LLAMADAS_CONCURRENTES);
+        ExecutorService executorService = Executors.newFixedThreadPool(NUMBER_OF_CONCURRENT_CALLS);
         List<Callable<Void>> calls = createCalls();
 
         executorService.invokeAll(calls);
@@ -53,7 +53,7 @@ public class Main {
 
     private static List<Callable<Void>> createCalls() {
         List<Callable<Void>> calls = new ArrayList<>();
-        for (int i = 0; i < NUMERO_DE_LLAMADAS_A_PROBAR; i++) {
+        for (int i = 0; i < NUMBER_OF_TEST_CALLS; i++) {
             calls.add(new Call(i));
         }
         return calls;
