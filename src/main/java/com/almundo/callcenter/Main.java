@@ -18,7 +18,7 @@ import java.util.concurrent.Executors;
  */
 public class Main {
 
-    private static final Dispatcher dispatcher = Dispatcher.getSingletonInstance();
+    private static final Dispatcher DISPATCHER = Dispatcher.getSingletonInstance();
 
     private static final String OPERATOR_NAME = "Operator #%d";
     private static final String SUPERVISOR_NAME = "Supervisor #%d";
@@ -44,15 +44,15 @@ public class Main {
     private static void createEmployees() {
 
         for (int i = 1; i <= OPERATORS; i++) {
-            dispatcher.addEmployee(EmployeeFactory.getEmployee(String.format(OPERATOR_NAME, i), Charge.OPERATOR));
+            DISPATCHER.addEmployee(EmployeeFactory.getEmployee(String.format(OPERATOR_NAME, i), Charge.OPERATOR));
         }
 
         for (int i = 1; i <= SUPERVISORS; i++) {
-            dispatcher.addEmployee(EmployeeFactory.getEmployee(String.format(SUPERVISOR_NAME, i), Charge.SUPERVISOR));
+            DISPATCHER.addEmployee(EmployeeFactory.getEmployee(String.format(SUPERVISOR_NAME, i), Charge.SUPERVISOR));
         }
 
         for (int i = 1; i <= DIRECTORS; i++) {
-            dispatcher.addEmployee(EmployeeFactory.getEmployee(String.format(DIRECTOR_NAME, i), Charge.DIRECTOR));
+            DISPATCHER.addEmployee(EmployeeFactory.getEmployee(String.format(DIRECTOR_NAME, i), Charge.DIRECTOR));
         }
     }
 
