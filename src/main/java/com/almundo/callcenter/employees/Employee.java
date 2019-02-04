@@ -18,7 +18,6 @@ public abstract class Employee implements Comparable<Employee>  {
         return charge;
     }
 
-    @Override
     public int compareTo(Employee employee) {
         return this.getCharge().getPriority().compareTo(employee.getCharge().getPriority());
     }
