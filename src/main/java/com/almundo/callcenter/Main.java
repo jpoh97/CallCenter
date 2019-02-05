@@ -34,7 +34,7 @@ public class Main {
         createEmployees();
 
         ExecutorService executorService = Executors.newFixedThreadPool(NUMBER_OF_CONCURRENT_CALLS);
-        List<Callable<Void>> calls = createCalls();
+        List<Callable<Call>> calls = createCalls();
 
         executorService.invokeAll(calls);
 
@@ -56,8 +56,8 @@ public class Main {
         }
     }
 
-    private static List<Callable<Void>> createCalls() {
-        List<Callable<Void>> calls = new ArrayList<>();
+    private static List<Callable<Call>> createCalls() {
+        List<Callable<Call>> calls = new ArrayList<>();
         for (int i = 0; i < NUMBER_OF_TEST_CALLS; i++) {
             calls.add(new Call(i));
         }

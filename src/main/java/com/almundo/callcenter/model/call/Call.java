@@ -10,7 +10,7 @@ import java.util.concurrent.Callable;
  * Se escoge Callable y no Runnable ya que el executorService recibe una lista de Callable al llamar al metodo invokeAll
  * En esta clase se define que el numero maximo de segundos es 10 y el minimo es 5, y se genera un numero aleatorio entre estos
  */
-public class Call implements Callable<Void> {
+public class Call implements Callable<Call> {
 
     private static final Integer MIN_DURATION = 5;
     private static final Integer MAX_DURATION = 10;
@@ -37,8 +37,8 @@ public class Call implements Callable<Void> {
     }
 
     @Override
-    public Void call() {
+    public Call call() {
         Dispatcher.getSingletonInstance().dispatchCall(this);
-        return null;
+        return this;
     }
 }
