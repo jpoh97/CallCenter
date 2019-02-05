@@ -27,7 +27,7 @@ public class Main {
     private static final int SUPERVISORS = 2;
     private static final int DIRECTORS = 1;
 
-    private static final int NUMBER_OF_CONCURRENT_CALLS = 10;
+    private static final int NUMBER_OF_CONCURRENT_CALLS = 12;
     private static final int NUMBER_OF_TEST_CALLS = 20;
 
     public static void main(String... args) throws InterruptedException {
@@ -58,7 +58,7 @@ public class Main {
 
     private static List<Callable<Call>> createCalls() {
         List<Callable<Call>> calls = new ArrayList<>();
-        for (int i = 0; i < NUMBER_OF_TEST_CALLS; i++) {
+        for (int i = 1; i <= NUMBER_OF_TEST_CALLS; i++) {
             calls.add(new Call(i));
         }
         return calls;

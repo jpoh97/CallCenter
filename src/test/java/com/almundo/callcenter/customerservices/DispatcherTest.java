@@ -23,24 +23,37 @@ public class DispatcherTest {
     private static final String OPERATOR_NAME = "Operator #%d";
     private static final String SUPERVISOR_NAME = "Supervisor #%d";
     private static final String DIRECTOR_NAME = "Director #%d";
+    private static final int OPERATORS = 7;
+    private static final int SUPERVISORS = 2;
+    private static final int DIRECTORS = 1;
+    private static final int TEN_CONCURRENT_CALLS = 10;
 
-    private static Dispatcher DISPATCHER;
+    private static final Dispatcher DISPATCHER = Dispatcher.getSingletonInstance();
+    private ExecutorService executorService;
 
     @Before
     public void setUp() {
-        DISPATCHER = Dispatcher.getSingletonInstance();
+        addOperators();
+        addSupervisor();
+        addDirectors();
     }
 
     @After
     public void tearDown() {
-        DISPATCHER = null;
+        DISPATCHER.clearEmployeesQueue();
     }
 
+    /**
+     * Se verifica que la instancia del singleton no es nula
+     */
     @Test
     public void testGetSingletonInstanceNonNullity() {
         assertNotNull("Singleton can not return null", Dispatcher.getSingletonInstance());
     }
 
+    /**
+     * Se verifica que se obtiene siempre la misma instancia cumpliendo con el patron singleton
+     */
     @Test
     public void testGetSingletonInstanceConsistent() {
         Dispatcher dispatcher1 = Dispatcher.getSingletonInstance();
@@ -48,25 +61,20 @@ public class DispatcherTest {
         assertEquals("Dispatcher must be same instance because implement singleton pattern", dispatcher1, dispatcher2);
     }
 
+    /**
+     * Se verifica que no se puede modificar la cola de empleados siendo esta inmutable
+     */
     @Test(expected = UnsupportedOperationException.class)
     public void testGetEmployeesImmutableCollection() {
         DISPATCHER.getEmployees().clear();
-        Assert.fail();
+        Assert.fail("We can't modify immutable collection");
     }
 
+    /**
+     * Se verifica que la cantidad de empleados que se crearon desde el inicio sean los mismos que queden en la cola
+     */
     @Test
     public void testAddEmployeeSevenOperatorsTwoSupervisorAndOneDirector() {
-        // Arrange
-        final int OPERATORS = 7;
-        final int SUPERVISORS = 2;
-        final int DIRECTORS = 1;
-
-        // Act
-        addOperators(OPERATORS);
-        addSupervisor(SUPERVISORS);
-        addDirectors(DIRECTORS);
-
-        // Assert
         assertEquals("Employees array must have 10 elements", OPERATORS + SUPERVISORS + DIRECTORS, DISPATCHER.getEmployees().size());
 
         assertEquals("Employees array must have 7 operators", OPERATORS, DISPATCHER.getEmployees().stream()
@@ -77,26 +85,24 @@ public class DispatcherTest {
                 .filter(e -> e.getCharge().equals(Charge.DIRECTOR)).collect(Collectors.toList()).size());
     }
 
+    /**
+     * Se verifican 10 llamadas concurrentes. Estas 10 llamadas las contestan todos los 10 empleados del call center.
+     * @throws InterruptedException Excepcion que se puede provocar al llamar el metodo invokeAll del executorService
+     * @throws ExecutionException Excepcion se puede provacar al hacer futureCall.get()
+     */
     @Test
     public void testDispatchCallTenConcurrentCalls() throws InterruptedException, ExecutionException {
         // Arrange
-        final int OPERATORS = 7;
-        final int SUPERVISORS = 2;
-        final int DIRECTORS = 1;
-        final int CALLS = 10;
-        final int NUMBER_OF_CONCURRENT_CALLS = 10;
+        final int NUMBER_OF_CALLS = 10;
 
         // Act
-        addOperators(OPERATORS);
-        addSupervisor(SUPERVISORS);
-        addDirectors(DIRECTORS);
-        List<Callable<Call>> calls = createCalls(CALLS);
-        ExecutorService executorService = Executors.newFixedThreadPool(NUMBER_OF_CONCURRENT_CALLS);
+        List<Callable<Call>> calls = createCalls(NUMBER_OF_CALLS);
+        executorService = Executors.newFixedThreadPool(TEN_CONCURRENT_CALLS);
 
         List<Future<Call>> futureCalls = executorService.invokeAll(calls);
 
         // Assert
-        assertEquals("Concurrent calls must be 10", NUMBER_OF_CONCURRENT_CALLS, futureCalls.size());
+        assertEquals("Concurrent calls must be 10", TEN_CONCURRENT_CALLS, futureCalls.size());
         for (Future<Call> futureCall : futureCalls) {
             assertNotNull("Future cannot return null", futureCall.get());
         }
@@ -117,73 +123,88 @@ public class DispatcherTest {
     @Test
     public void testDispatchCallFifteenCallsWithTenConcurrentCalls() throws InterruptedException, ExecutionException {
         // Arrange
-        final int OPERATORS = 7;
-        final int SUPERVISORS = 2;
-        final int DIRECTORS = 1;
-        final int NUMBER_CALLS = 15;
-        final int NUMBER_OF_CONCURRENT_CALLS = 10;
+        final int NUMBER_OF_CALLS = 15;
 
         // Act
-        addOperators(OPERATORS);
-        addSupervisor(SUPERVISORS);
-        addDirectors(DIRECTORS);
-        List<Callable<Call>> calls = createCalls(NUMBER_CALLS);
-        ExecutorService executorService = Executors.newFixedThreadPool(NUMBER_OF_CONCURRENT_CALLS);
+        List<Callable<Call>> calls = createCalls(NUMBER_OF_CALLS);
+        executorService = Executors.newFixedThreadPool(TEN_CONCURRENT_CALLS);
 
         List<Future<Call>> futureCalls = executorService.invokeAll(calls);
 
         // Assert
-        assertEquals("Number of calls must be 15", NUMBER_CALLS, futureCalls.size());
+        assertEquals("Number of calls must be 15", NUMBER_OF_CALLS, futureCalls.size());
         for (Future<Call> futureCall : futureCalls) {
             assertNotNull("Future cannot return null", futureCall.get());
         }
     }
 
+    /**
+     * Se verifican 15 llamadas concurrentes. Se toman las primeras 10 y las siguientes quedan en espera en la cola de llamadas.
+     * Se prueba con 15 hilos que simulan lass 15 llamadas concurrentes y se verifica que todas las llamadas sean realizadas
+     * @throws InterruptedException Excepcion que se puede provocar al llamar el metodo invokeAll del executorService
+     * @throws ExecutionException Excepcion se puede provacar al hacer futureCall.get()
+     */
+    @Test
+    public void testDispatchCallFifteenCallsWithFifteenConcurrentCalls() throws InterruptedException, ExecutionException {
+        // Arrange
+        final int FIFTEEN_CONCURRENT_CALLS = 15;
+        final int NUMBER_OF_CALLS = 15;
+
+        // Act
+        List<Callable<Call>> calls = createCalls(NUMBER_OF_CALLS);
+        executorService = Executors.newFixedThreadPool(FIFTEEN_CONCURRENT_CALLS);
+
+        List<Future<Call>> futureCalls = executorService.invokeAll(calls);
+
+        // Assert
+        assertEquals("Number of calls must be 15", NUMBER_OF_CALLS, futureCalls.size());
+        for (Future<Call> futureCall : futureCalls) {
+            assertNotNull("Future cannot return null", futureCall.get());
+        }
+    }
+
+    /**
+     * Se verifica que con 10 llamadas concurrentes todos los empleados tomen una y no quede ningun empleado disponible
+     * @throws InterruptedException Excepcion que se puede provocar al llamar el metodo awaitTermination del executorService
+     */
     @Test
     public void testDispatchCallTenConcurrentCallsAllEmployeesBusy() throws InterruptedException {
         // Arrange
-        final int OPERATORS = 7;
-        final int SUPERVISORS = 2;
-        final int DIRECTORS = 1;
-        final int NUMBER_CALLS = 10;
-        final int NUMBER_OF_CONCURRENT_CALLS = 10;
+        final int NUMBER_OF_CALLS = 10;
 
         // Act
-        addOperators(OPERATORS);
-        addSupervisor(SUPERVISORS);
-        addDirectors(DIRECTORS);
-        List<Callable<Call>> calls = createCalls(NUMBER_CALLS);
-        ExecutorService executorService = Executors.newFixedThreadPool(NUMBER_OF_CONCURRENT_CALLS);
+        List<Callable<Call>> calls = createCalls(NUMBER_OF_CALLS);
+        executorService = Executors.newFixedThreadPool(TEN_CONCURRENT_CALLS);
 
         for (Callable<Call> call : calls) {
             executorService.submit(call);
         }
+        executorService.shutdown();
         executorService.awaitTermination(1, TimeUnit.SECONDS);
 
         // Assert
         assertEquals("All employees are busy, none is available",0, DISPATCHER.getEmployees().size());
     }
 
-
+    /**
+     * Se verifica que con 7 llamadas concurrentes, estas sean contestadas por los 7 operadores, y que los supervisores y
+     * el director sigan disponibles en la cola de empleados.
+     * Esto debido a las reglas de prioridad definidas en el call center
+     * @throws InterruptedException Excepcion que se puede provocar al llamar el metodo awaitTermination del executorService
+     */
     @Test
     public void testDispatchCallSevenConcurrentCallsAllOperatorsBusy() throws InterruptedException {
         // Arrange
-        final int OPERATORS = 7;
-        final int SUPERVISORS = 2;
-        final int DIRECTORS = 1;
-        final int NUMBER_CALLS = 7;
-        final int NUMBER_OF_CONCURRENT_CALLS = 10;
+        final int NUMBER_OF_CALLS = 7;
 
         // Act
-        addOperators(OPERATORS);
-        addSupervisor(SUPERVISORS);
-        addDirectors(DIRECTORS);
-        List<Callable<Call>> calls = createCalls(NUMBER_CALLS);
-        ExecutorService executorService = Executors.newFixedThreadPool(NUMBER_OF_CONCURRENT_CALLS);
+        List<Callable<Call>> calls = createCalls(NUMBER_OF_CALLS);
+        ExecutorService executorService = Executors.newFixedThreadPool(TEN_CONCURRENT_CALLS);
 
         for (Callable<Call> call : calls) {
             executorService.submit(call);
         }
+        executorService.shutdown();
         executorService.awaitTermination(1, TimeUnit.SECONDS);
 
         // Assert
@@ -196,25 +217,25 @@ public class DispatcherTest {
                 .filter(employee -> employee.getCharge().equals(Charge.DIRECTOR)).collect(Collectors.toList()).size());
     }
 
+    /**
+     * Se verifica que con 8 llamadas concurrentes, estas sean contestadas por los 7 operadores y uno de los supervisores,
+     * y que el otro supervisor y el director sigan disponibles en la cola de empleados.
+     * Esto debido a las reglas de prioridad definidas en el call center
+     * @throws InterruptedException Excepcion que se puede provocar al llamar el metodo awaitTermination del executorService
+     */
     @Test
     public void testDispatchCallEightConcurrentCallsAllOperatorsAndOneSupervisorBusy() throws InterruptedException {
         // Arrange
-        final int OPERATORS = 7;
-        final int SUPERVISORS = 2;
-        final int DIRECTORS = 1;
-        final int NUMBER_CALLS = 8;
-        final int NUMBER_OF_CONCURRENT_CALLS = 10;
+        final int NUMBER_OF_CALLS = 8;
 
         // Act
-        addOperators(OPERATORS);
-        addSupervisor(SUPERVISORS);
-        addDirectors(DIRECTORS);
-        List<Callable<Call>> calls = createCalls(NUMBER_CALLS);
-        ExecutorService executorService = Executors.newFixedThreadPool(NUMBER_OF_CONCURRENT_CALLS);
+        List<Callable<Call>> calls = createCalls(NUMBER_OF_CALLS);
+        executorService = Executors.newFixedThreadPool(TEN_CONCURRENT_CALLS);
 
         for (Callable<Call> call : calls) {
             executorService.submit(call);
         }
+        executorService.shutdown();
         executorService.awaitTermination(1, TimeUnit.SECONDS);
 
         // Assert
@@ -227,25 +248,25 @@ public class DispatcherTest {
                 .filter(employee -> employee.getCharge().equals(Charge.DIRECTOR)).collect(Collectors.toList()).size());
     }
 
+    /**
+     * Se verifica que con 9 llamadas concurrentes, estas sean contestadas por los 7 operadores y los 2 de los supervisores,
+     * y que el director siga disponible en la cola de empleados.
+     * Esto debido a las reglas de prioridad definidas en el call center
+     * @throws InterruptedException Excepcion que se puede provocar al llamar el metodo awaitTermination del executorService
+     */
     @Test
     public void testDispatchCallNineConcurrentCallsAllOperatorsAndSupervisorsBusy() throws InterruptedException {
         // Arrange
-        final int OPERATORS = 7;
-        final int SUPERVISORS = 2;
-        final int DIRECTORS = 1;
-        final int NUMBER_CALLS = 9;
-        final int NUMBER_OF_CONCURRENT_CALLS = 10;
+        final int NUMBER_OF_CALLS = 9;
 
         // Act
-        addOperators(OPERATORS);
-        addSupervisor(SUPERVISORS);
-        addDirectors(DIRECTORS);
-        List<Callable<Call>> calls = createCalls(NUMBER_CALLS);
-        ExecutorService executorService = Executors.newFixedThreadPool(NUMBER_OF_CONCURRENT_CALLS);
+        List<Callable<Call>> calls = createCalls(NUMBER_OF_CALLS);
+        executorService = Executors.newFixedThreadPool(TEN_CONCURRENT_CALLS);
 
         for (Callable<Call> call : calls) {
             executorService.submit(call);
         }
+        executorService.shutdown();
         executorService.awaitTermination(1, TimeUnit.SECONDS);
 
         // Assert
@@ -258,20 +279,20 @@ public class DispatcherTest {
                 .filter(employee -> employee.getCharge().equals(Charge.DIRECTOR)).collect(Collectors.toList()).size());
     }
 
-    private void addOperators(int quantity) {
-        for (int i = 0; i < quantity; i++) {
+    private void addOperators() {
+        for (int i = 0; i < OPERATORS; i++) {
             DISPATCHER.addEmployee(EmployeeFactory.of(String.format(OPERATOR_NAME, i), Charge.OPERATOR));
         }
     }
 
-    private void addSupervisor(int quantity) {
-        for (int i = 0; i < quantity; i++) {
+    private void addSupervisor() {
+        for (int i = 0; i < SUPERVISORS; i++) {
             DISPATCHER.addEmployee(EmployeeFactory.of(String.format(SUPERVISOR_NAME, i), Charge.SUPERVISOR));
         }
     }
 
-    private void addDirectors(int quantity) {
-        for (int i = 0; i < quantity; i++) {
+    private void addDirectors() {
+        for (int i = 0; i < DIRECTORS; i++) {
             DISPATCHER.addEmployee(EmployeeFactory.of(String.format(DIRECTOR_NAME, i), Charge.DIRECTOR));
         }
     }

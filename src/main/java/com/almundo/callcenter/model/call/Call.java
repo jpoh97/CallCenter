@@ -37,7 +37,7 @@ public class Call implements Callable<Call> {
     }
 
     @Override
-    public Call call() {
+    public Call call() throws InterruptedException {
         Dispatcher.getSingletonInstance().dispatchCall(this);
         return this;
     }

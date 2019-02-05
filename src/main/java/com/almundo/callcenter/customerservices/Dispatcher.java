@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Dispatcher tiene la funcion de coordinar cada las llamadas que entran. Esta clase implementa el patron Singleton.
@@ -18,10 +19,12 @@ import java.util.concurrent.TimeUnit;
  */
 public class Dispatcher {
 
-    private static final String MENSAJE_LLAMADA_RECIBIDA = "La llamada #%d sera contestada por %s";
-    private static final String MENSAJE_LLAMADA_TERMINADA = "Llamada #%d ha terminado y duro %d segundos";
+    private static final String MESSAGE_CALL_RECEIVED = "La llamada #%d sera contestada por %s";
+    private static final String MESSAGE_CALL_FINISHED = "Llamada #%d ha terminado y duro %d segundos";
+    private static final String WAITING_MESSAGE = "Todos los empleados estan ocupados, la llamada #%d sera contestada cuando se encuentre alguno disponible";
 
     private PriorityBlockingQueue<Employee> employees = new PriorityBlockingQueue<>();
+    private AtomicInteger numberOfConcurrentCalls = new AtomicInteger(0);
 
     private static Dispatcher dispatcher;
 
@@ -42,15 +45,21 @@ public class Dispatcher {
         return Collections.unmodifiableCollection(employees);
     }
 
-    public void dispatchCall(Call call) {
-        try {
-            Employee employee = employees.poll();
-            logger.info(String.format(MENSAJE_LLAMADA_RECIBIDA, call.getId(), employee.getName()));
-            TimeUnit.SECONDS.sleep(call.getDuration());
-            logger.info(String.format(MENSAJE_LLAMADA_TERMINADA, call.getId(), call.getDuration()));
-            employees.offer(employee);
-        } catch (InterruptedException | NullPointerException e) {
-            logger.error(e.getMessage(), e);
+    void clearEmployeesQueue() {
+        numberOfConcurrentCalls = new AtomicInteger(0);
+        this.employees.clear();
+    }
+
+    public void dispatchCall(Call call) throws InterruptedException {
+        numberOfConcurrentCalls.incrementAndGet();
+        if (numberOfConcurrentCalls.get() > 10) {
+            logger.info(String.format(WAITING_MESSAGE, call.getId()));
         }
+        Employee employee = employees.take();
+        logger.info(String.format(MESSAGE_CALL_RECEIVED, call.getId(), employee.getName()));
+        TimeUnit.SECONDS.sleep(call.getDuration());
+        logger.info(String.format(MESSAGE_CALL_FINISHED, call.getId(), call.getDuration()));
+        employees.offer(employee);
+        numberOfConcurrentCalls.decrementAndGet();
     }
 }
