@@ -1,5 +1,6 @@
 package com.almundo.callcenter.model.employees;
 
+import java.util.Comparator;
 import java.util.Objects;
 
 /**
@@ -12,6 +13,8 @@ public abstract class Employee implements Comparable<Employee>  {
     private final String name;
     private final Charge charge;
 
+    private static final Comparator<Employee> COMPARATOR = Comparator.comparingInt((Employee e) -> e.charge.getPriority());
+
     public Employee(String name, Charge charge) {
         Objects.requireNonNull(name);
         Objects.requireNonNull(charge);
@@ -23,7 +26,8 @@ public abstract class Employee implements Comparable<Employee>  {
         return name;
     }
 
+    @Override
     public int compareTo(Employee employee) {
-        return this.charge.getPriority().compareTo(employee.charge.getPriority());
+        return COMPARATOR.compare(this, employee);
     }
 }
