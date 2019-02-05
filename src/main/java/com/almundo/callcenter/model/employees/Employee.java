@@ -19,11 +19,7 @@ public abstract class Employee implements Comparable<Employee>  {
         return name;
     }
 
-    private Charge getCharge() {
-        return charge;
-    }
-
     public int compareTo(Employee employee) {
-        return this.getCharge().getPriority().compareTo(employee.getCharge().getPriority());
+        return this.charge.getPriority().compareTo(employee.charge.getPriority());
     }
 }
