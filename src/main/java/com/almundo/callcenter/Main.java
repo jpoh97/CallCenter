@@ -44,15 +44,15 @@ public class Main {
     private static void createEmployees() {
 
         for (int i = 1; i <= OPERATORS; i++) {
-            DISPATCHER.addEmployee(EmployeeFactory.getEmployee(String.format(OPERATOR_NAME, i), Charge.OPERATOR));
+            DISPATCHER.addEmployee(EmployeeFactory.of(String.format(OPERATOR_NAME, i), Charge.OPERATOR));
         }
 
         for (int i = 1; i <= SUPERVISORS; i++) {
-            DISPATCHER.addEmployee(EmployeeFactory.getEmployee(String.format(SUPERVISOR_NAME, i), Charge.SUPERVISOR));
+            DISPATCHER.addEmployee(EmployeeFactory.of(String.format(SUPERVISOR_NAME, i), Charge.SUPERVISOR));
         }
 
         for (int i = 1; i <= DIRECTORS; i++) {
-            DISPATCHER.addEmployee(EmployeeFactory.getEmployee(String.format(DIRECTOR_NAME, i), Charge.DIRECTOR));
+            DISPATCHER.addEmployee(EmployeeFactory.of(String.format(DIRECTOR_NAME, i), Charge.DIRECTOR));
         }
     }
 

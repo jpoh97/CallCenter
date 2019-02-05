@@ -9,7 +9,7 @@ import com.almundo.callcenter.model.employees.implementations.Supervisor;
  */
 public class EmployeeFactory {
 
-    public static Employee getEmployee(String name, Charge charge) {
+    public static Employee of(String name, Charge charge) {
         Employee employee = null;
         switch (charge) {
             case OPERATOR:
