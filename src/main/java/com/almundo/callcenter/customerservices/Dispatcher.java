@@ -4,6 +4,8 @@ import com.almundo.callcenter.model.call.Call;
 import com.almundo.callcenter.model.employees.Employee;
 import org.apache.log4j.Logger;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
@@ -34,6 +36,10 @@ public class Dispatcher {
 
     public void addEmployee(Employee employee) {
         this.employees.offer(employee);
+    }
+
+    Collection<Employee> getEmployees() {
+        return Collections.unmodifiableCollection(employees);
     }
 
     public void dispatchCall(Call call) {
