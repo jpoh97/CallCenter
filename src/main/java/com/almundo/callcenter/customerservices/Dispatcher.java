@@ -23,7 +23,7 @@ public class Dispatcher {
     private static final String MESSAGE_CALL_FINISHED = "Llamada #%d ha terminado y duro %d segundos";
     private static final String WAITING_MESSAGE = "Todos los empleados estan ocupados, la llamada #%d sera contestada cuando se encuentre alguno disponible";
 
-    private PriorityBlockingQueue<Employee> employees = new PriorityBlockingQueue<>();
+    private final PriorityBlockingQueue<Employee> employees = new PriorityBlockingQueue<>();
     private AtomicInteger numberOfConcurrentCalls = new AtomicInteger(0);
 
     private static Dispatcher dispatcher;
